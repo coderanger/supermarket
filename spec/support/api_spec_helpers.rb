@@ -1,11 +1,17 @@
 require 'and_feathers'
 require 'and_feathers/gzipped_tarball'
 require 'tempfile'
+require 'mixlib/authentication/signedheaderauth'
 
 module ApiSpecHelpers
   def share_cookbook(cookbook_name, options = {})
     category_name = options.fetch(:category, 'other').titleize
     custom_metadata = options.dup.tap { |o| o.delete(:category) }
+
+    user = create(:user)
+    user.accounts << create(:account, provider: 'chef_oauth2', username: 'supermarket')
+
+    private_key = OpenSSL::PKey::RSA.new(File.read('spec/support/key_fixtures/valid_private_key.pem'))
 
     metadata = {
       name: cookbook_name,
@@ -36,7 +42,15 @@ module ApiSpecHelpers
     tarball_upload = fixture_file_upload(tarball.path, 'application/x-gzip')
     category = create(:category, name: category_name)
 
-    post '/api/v1/cookbooks', cookbook: "{\"category\": \"#{category_name}\"}", tarball: tarball_upload
+    signed_header = Mixlib::Authentication::SignedHeaderAuth.signing_object({
+      http_method: 'post',
+      path: '/api/v1/cookbooks',
+      user_id: 'supermarket',
+      timestamp: Time.now.utc.iso8601,
+      body: tarball.read
+    }).sign(private_key)
+
+    post '/api/v1/cookbooks', { cookbook: "{\"category\": \"#{category_name}\"}", tarball: tarball_upload }, signed_header
   end
 
   def json_body

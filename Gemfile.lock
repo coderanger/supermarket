@@ -411,6 +411,7 @@ DEPENDENCIES
   license_finder
   magiconf
   mail_view
+  mixlib-authentication
   nokogiri
   octokit!
   omniauth

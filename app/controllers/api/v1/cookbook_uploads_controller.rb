@@ -1,4 +1,5 @@
 require 'cookbook_upload'
+require 'mixlib/authentication/signatureverification'
 
 class Api::V1::CookbookUploadsController < Api::V1Controller
   #
@@ -32,6 +33,7 @@ class Api::V1::CookbookUploadsController < Api::V1Controller
   # @see CookbookUpload::Parameters
   #
   def create
+    authenticate_user!
     cookbook_upload = CookbookUpload.new(upload_params)
     cookbook_upload.finish do |errors, cookbook|
       if errors.any?
@@ -61,10 +63,7 @@ class Api::V1::CookbookUploadsController < Api::V1Controller
 
   private
 
-  def error(body)
-    render json: body, status: 400
-  end
-
+  def error(body) render json: body, status: 400 end
   #
   # The parameters required to upload a cookbook
   #
@@ -78,5 +77,35 @@ class Api::V1::CookbookUploadsController < Api::V1Controller
       cookbook: params.require(:cookbook),
       tarball: params.require(:tarball)
     }
+  end
+
+  #
+  # Finds a user specified in the request header or renders an error if
+  # the user doesn't exist. Then attempts to authorize the signed request
+  # against the users public key or renders an error if it fails.
+  #
+  def authenticate_user!
+    username = request.headers['X-Ops-Userid']
+    user = User.joins(:accounts).
+      where('accounts.username = ? AND accounts.provider = ?', username, 'chef_oauth2').first
+
+    if !user
+      error(
+        error: t('api.error_codes.authentication_failed'),
+        error_messages: t("api.error_messages.invalid_username", username: username)
+      )
+    end
+
+    begin
+      Mixlib::Authentication::SignatureVerification.new.authenticate_user_request(
+        request,
+        OpenSSL::PKey::RSA.new(user.public_key)
+      )
+    rescue StandardError => e
+      error(
+        error: t('api.error_codes.authentication_failed'),
+        error_messages: e
+      )
+    end
   end
 end
