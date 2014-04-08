@@ -9,7 +9,7 @@ module ApiSpecHelpers
       user = options[:user]
     else
       user = create(:user)
-      user.accounts << create(:account, provider: 'chef_oauth2', username: 'supermarket')
+      user.accounts << create(:account, provider: 'chef_oauth2')
     end
 
     category = create(:category, name: options.fetch(:category, 'other').titleize)
@@ -55,7 +55,7 @@ module ApiSpecHelpers
       body: tarball.read
     }).sign(private_key)
 
-    post '/api/v1/cookbooks', payload, signed_header
+    post '/api/v1/cookbooks', payload.merge(signed_header)
   end
 
   def json_body

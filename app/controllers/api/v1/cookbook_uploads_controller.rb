@@ -2,6 +2,8 @@ require 'cookbook_upload'
 require 'mixlib/authentication/signatureverification'
 
 class Api::V1::CookbookUploadsController < Api::V1Controller
+  before_filter :authenticate_user!
+
   #
   # POST /api/v1/cookbooks
   #
@@ -33,7 +35,6 @@ class Api::V1::CookbookUploadsController < Api::V1Controller
   # @see CookbookUpload::Parameters
   #
   def create
-    authenticate_user!
     cookbook_upload = CookbookUpload.new(upload_params)
     cookbook_upload.finish do |errors, cookbook|
       if errors.any?
@@ -63,8 +64,8 @@ class Api::V1::CookbookUploadsController < Api::V1Controller
 
   private
 
-  def error(body)
-    render json: body, status: 400
+  def error(body, status = 400)
+    render json: body, status: status
   end
 
   #
@@ -89,25 +90,34 @@ class Api::V1::CookbookUploadsController < Api::V1Controller
   #
   def authenticate_user!
     username = request.headers['X-Ops-Userid']
-    user = User.joins(:accounts).
-      where('accounts.username = ? AND accounts.provider = ?', username, 'chef_oauth2').first
+    user = Account.for('chef_oauth2').where(username: username).first.try(:user)
 
     if !user
-      error(
-        error: t('api.error_codes.authentication_failed'),
-        error_messages: t("api.error_messages.invalid_username", username: username)
+      return error(
+        {
+          error_code: t('api.error_codes.authentication_failed'),
+          error_messages: t("api.error_messages.invalid_username", username: username)
+        },
+        401
       )
     end
 
-    begin
-      Mixlib::Authentication::SignatureVerification.new.authenticate_user_request(
-        request,
-        OpenSSL::PKey::RSA.new(user.public_key)
-      )
-    rescue StandardError => e
-      error(
-        error: t('api.error_codes.authentication_failed'),
-        error_messages: e
+    public_key = OpenSSL::PKey::RSA.new(user.public_key)
+
+    auth = Mixlib::Authentication::SignatureVerification.new.authenticate_user_request(
+      request,
+      public_key
+    )
+
+    if auth
+      @current_user = user
+    else
+      return error(
+        {
+          error_code: t('api.error_codes.authentication_failed'),
+          error_messages: 'Some other error message'
+        },
+        401
       )
     end
   end

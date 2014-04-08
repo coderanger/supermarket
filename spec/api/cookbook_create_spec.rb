@@ -13,7 +13,7 @@ describe 'POST /api/v1/cookbooks' do
     end
   end
 
-  context "the user doesn't provide valid params" do
+  context "the user doesn't provide valid params", focus: true do
     before(:each) { share_cookbook('redis-test', payload: {}) }
 
     it 'returns a 400' do
@@ -32,15 +32,31 @@ describe 'POST /api/v1/cookbooks' do
   context "the user sharing doesn't exist" do
     before(:each) { share_cookbook('redis-test', user: double(:user, username: 'non-existent-user')) }
 
-    xit 'returns a 401' do
-      expect(response.status.to_i).to eql(400)
+    it 'returns a 401' do
+      expect(response.status.to_i).to eql(401)
     end
 
-    xit 'returns an error code' do
+    it 'returns an error code' do
       expect(json_body['error_code']).to_not be_nil
     end
 
-    xit 'returns an error message' do
+    it 'returns an error message' do
+      expect(json_body['error_messages']).to_not be_nil
+    end
+  end
+
+  context "the users private/public key pair is invalid" do
+    before(:each) { share_cookbook('redis-test', private_key: 'invalid_private_key.pem') }
+
+    it 'returns a 401' do
+      expect(response.status.to_i).to eql(401)
+    end
+
+    it 'returns an error code' do
+      expect(json_body['error_code']).to_not be_nil
+    end
+
+    it 'returns an error message' do
       expect(json_body['error_messages']).to_not be_nil
     end
   end
