@@ -13,7 +13,7 @@ describe 'POST /api/v1/cookbooks' do
     end
   end
 
-  context "the user doesn't provide valid params", focus: true do
+  context "the user doesn't provide valid params" do
     before(:each) { share_cookbook('redis-test', payload: {}) }
 
     it 'returns a 400' do
@@ -58,6 +58,14 @@ describe 'POST /api/v1/cookbooks' do
 
     it 'returns an error message' do
       expect(json_body['error_messages']).to_not be_nil
+    end
+  end
+
+  context "invalid signing headers are sent" do
+    before(:each) { share_cookbook('redis-test', omitted_headers: ['HTTP_X_OPS_SIGN']) }
+
+    it 'returns a 400' do
+      expect(response.status.to_i).to eql(400)
     end
   end
 end

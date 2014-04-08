@@ -55,7 +55,9 @@ module ApiSpecHelpers
       body: tarball.read
     }).sign(private_key)
 
-    post '/api/v1/cookbooks', payload.merge(signed_header)
+    options.fetch(:omitted_headers, []).each { |h| signed_header.delete(h) }
+
+    post '/api/v1/cookbooks', payload, signed_header
   end
 
   def json_body

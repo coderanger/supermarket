@@ -2,6 +2,7 @@ require 'cookbook_upload'
 require 'mixlib/authentication/signatureverification'
 
 class Api::V1::CookbookUploadsController < Api::V1Controller
+  before_filter :require_upload_params, only: :create
   before_filter :authenticate_user!
 
   #
@@ -62,6 +63,9 @@ class Api::V1::CookbookUploadsController < Api::V1Controller
     )
   end
 
+  rescue_from Mixlib::Authentication:AuthenticationError do |e|
+  end
+
   private
 
   def error(body, status = 400)
@@ -83,6 +87,8 @@ class Api::V1::CookbookUploadsController < Api::V1Controller
     }
   end
 
+  alias_method :require_upload_params, :upload_params
+
   #
   # Finds a user specified in the request header or renders an error if
   # the user doesn't exist. Then attempts to authorize the signed request
@@ -102,11 +108,9 @@ class Api::V1::CookbookUploadsController < Api::V1Controller
       )
     end
 
-    public_key = OpenSSL::PKey::RSA.new(user.public_key)
-
     auth = Mixlib::Authentication::SignatureVerification.new.authenticate_user_request(
       request,
-      public_key
+      OpenSSL::PKey::RSA.new(user.public_key)
     )
 
     if auth
