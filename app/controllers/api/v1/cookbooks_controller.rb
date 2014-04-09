@@ -54,28 +54,6 @@ class Api::V1::CookbooksController < Api::V1Controller
     ).offset(@start).limit(@items)
   end
 
-  #
-  # DELETE /api/v1/cookbooks/:cookbook
-  #
-  # Destroys the specified cookbook. If it does not exist, return a 404.
-  #
-  # @example
-  #   DELETE /api/v1/cookbooks/redis
-  #
-  def destroy
-    @cookbook = Cookbook.with_name(params[:cookbook]).first!
-    assign_latest_version_url
-
-    @cookbook.destroy
-
-    if @cookbook.destroyed?
-      SegmentIO.track_server_event(
-        'cookbook_deleted',
-        cookbook: @cookbook.name
-      )
-    end
-  end
-
   private
 
   #

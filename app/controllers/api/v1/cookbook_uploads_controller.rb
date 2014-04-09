@@ -56,6 +56,29 @@ class Api::V1::CookbookUploadsController < Api::V1Controller
     end
   end
 
+  #
+  # DELETE /api/v1/cookbooks/:cookbook
+  #
+  # Destroys the specified cookbook. If it does not exist, return a 404.
+  #
+  # @example
+  #   DELETE /api/v1/cookbooks/redis
+  #
+  def destroy
+    @cookbook = Cookbook.with_name(params[:cookbook]).first!
+    byebug
+    assign_latest_version_url
+
+    @cookbook.destroy
+
+    if @cookbook.destroyed?
+      SegmentIO.track_server_event(
+        'cookbook_deleted',
+        cookbook: @cookbook.name
+      )
+    end
+  end
+
   rescue_from ActionController::ParameterMissing do |e|
     error(
       error_code: t('api.error_codes.invalid_data'),
@@ -63,7 +86,11 @@ class Api::V1::CookbookUploadsController < Api::V1Controller
     )
   end
 
-  rescue_from Mixlib::Authentication:AuthenticationError do |e|
+  rescue_from Mixlib::Authentication::AuthenticationError do |e|
+    error(
+      error_code: t('api.error_codes.authentication_failed'),
+      error_messages: t('api.error_messages.authentication_request_error')
+    )
   end
 
   private
@@ -119,7 +146,7 @@ class Api::V1::CookbookUploadsController < Api::V1Controller
       return error(
         {
           error_code: t('api.error_codes.authentication_failed'),
-          error_messages: 'Some other error message'
+          error_messages: t('api.error_messages.authentication_key_error')
         },
         401
       )

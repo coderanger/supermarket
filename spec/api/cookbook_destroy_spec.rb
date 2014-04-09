@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe 'DELETE /api/v1/cookbooks/:cookbook' do
-  context 'the cookbook exists' do
+  context 'the cookbook exists', focus: true do
     let(:cookbook_metadata_signature) do
       {
         'name' => 'redis-test',
@@ -15,8 +15,8 @@ describe 'DELETE /api/v1/cookbooks/:cookbook' do
     end
 
     before do
-      share_cookbook('redis-test')
-      delete json_body['uri']
+      share_cookbook(cookbook_name: 'redis-test')
+      unshare_cookbook('redis-test')
     end
 
     it 'returns a 200' do
@@ -29,15 +29,13 @@ describe 'DELETE /api/v1/cookbooks/:cookbook' do
   end
 
   context "the cookbook doesn't exist" do
-    it 'returns a 404' do
-      get '/api/v1/cookbooks/mamimi'
+    before { unshare_cookbook('mamimi') }
 
+    it 'returns a 404' do
       expect(response.status.to_i).to eql(404)
     end
 
     it 'returns a 404 message' do
-      get '/api/v1/cookbooks/mamimi'
-
       expect(json_body).to eql(error_404)
     end
   end

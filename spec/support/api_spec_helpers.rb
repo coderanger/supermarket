@@ -84,6 +84,13 @@ module ApiSpecHelpers
     post '/api/v1/cookbooks', payload, sr.signed_headers
   end
 
+  def unshare_cookbook(cookbook_name)
+    cookbook_path = "/api/v1/cookbooks/#{cookbook_name}"
+
+    sr = SignedRequestHelper.new(request_path: cookbook_path, request_method: 'delete', cookbook_name: cookbook_name)
+    delete cookbook_path, {}, sr.signed_headers
+  end
+
   def json_body
     JSON.parse(response.body)
   end
