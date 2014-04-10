@@ -45,7 +45,7 @@ describe 'POST /api/v1/cookbooks' do
     end
   end
 
-  context "the users private/public key pair is invalid" do
+  context 'the users private/public key pair is invalid' do
     before(:each) { share_cookbook('redis-test', private_key: 'invalid_private_key.pem') }
 
     it 'returns a 401' do
@@ -61,7 +61,7 @@ describe 'POST /api/v1/cookbooks' do
     end
   end
 
-  context "invalid signing headers are sent" do
+  context 'invalid signing headers are sent' do
     before(:each) { share_cookbook('redis-test', omitted_headers: ['X-Ops-Sign']) }
 
     it 'returns a 400' do

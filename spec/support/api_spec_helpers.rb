@@ -69,20 +69,20 @@ module ApiSpecHelpers
         File.read("spec/support/key_fixtures/#{opts.fetch(:private_key, 'valid_private_key.pem')}")
       )
 
-      if opts.has_key?(:user)
+      if opts.key?(:user)
         user = opts[:user]
       else
         user = create(:user)
         user.accounts << create(:account, provider: 'chef_oauth2')
       end
 
-      @contents = Mixlib::Authentication::SignedHeaderAuth.signing_object({
+      @contents = Mixlib::Authentication::SignedHeaderAuth.signing_object(
         http_method: opts.fetch(:request_method, 'post'),
         path: opts.fetch(:request_path, '/api/v1/cookbooks'),
         user_id: user.username,
         timestamp: Time.now.utc.iso8601,
         body: tarball.read
-      }).sign(private_key)
+      ).sign(private_key)
 
       opts.fetch(:omitted_headers, []).each { |h| @contents.delete(h) }
     end
@@ -94,7 +94,7 @@ module ApiSpecHelpers
     signed_header = SignedHeader.new(tarball_upload, options)
 
     category = create(:category, name: options.fetch(:category, 'other').titleize)
-    payload = options.fetch(:payload, { cookbook: "{\"category\": \"#{category.name}\"}", tarball: tarball_upload })
+    payload = options.fetch(:payload, cookbook: "{\"category\": \"#{category.name}\"}", tarball: tarball_upload)
 
     post '/api/v1/cookbooks', payload, signed_header.contents
   end

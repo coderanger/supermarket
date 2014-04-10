@@ -126,11 +126,11 @@ class Api::V1::CookbookUploadsController < Api::V1Controller
     username = request.headers['X-Ops-Userid']
     user = Account.for('chef_oauth2').where(username: username).first.try(:user)
 
-    if !user
+    unless user
       return error(
         {
           error_code: t('api.error_codes.authentication_failed'),
-          error_messages: t("api.error_messages.invalid_username", username: username)
+          error_messages: t('api.error_messages.invalid_username', username: username)
         },
         401
       )
