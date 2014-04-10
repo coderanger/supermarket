@@ -11,6 +11,7 @@ describe "updating a cookbook's issue and source urls" do
 
     within '.cookbook_show_sidebar' do
       follow_relation 'edit-cookbook-urls'
+      sleep 1
       fill_in 'cookbook_source_url', with: 'http://example.com/source'
       fill_in 'cookbook_source_url', with: 'http://example.com/tissues'
       submit_form
