@@ -4,12 +4,20 @@ require 'tempfile'
 require 'mixlib/authentication/signedheaderauth'
 
 module ApiSpecHelpers
-  class CookbookUpload
+  class LocalCookbook
+    # @attr_reader [Tempfile] the tarball that represents the cookbook
     attr_reader :tarball
 
-    def initialize(name, options = {})
-      @name = name
-      @metadata = {
+    #
+    # Initialize an example cookbook as it would appear on the local file system.
+    #
+    # @param [String] the name of the cookbook.
+    #
+    # @param [Hash] opt the options to create the cookbook with
+    # @option opts [Hash] :custom_metadata any metadata that you'd like to override
+    #
+    def initialize(name, opts = {})
+      metadata = {
         name: name,
         version: '1.0.0',
         description: "Installs/Configures #{name}",
@@ -21,13 +29,13 @@ module ApiSpecHelpers
         dependencies: {
           'apt' => '~> 1.0.0'
         }
-      }.merge(options.fetch(:custom_metadata, {}))
+      }.merge(opts.fetch(:custom_metadata, {}))
 
-      @tarball = Tempfile.new([@name, '.tgz'], 'tmp').tap do |file|
-        io = AndFeathers.build(@name) do |base_dir|
+      @tarball = Tempfile.new([name, '.tgz'], 'tmp').tap do |file|
+        io = AndFeathers.build(name) do |base_dir|
           base_dir.file('README.md') { '# README' }
           base_dir.file('metadata.json') do
-            JSON.dump(@metadata)
+            JSON.dump(metadata)
           end
         end.to_io(AndFeathers::GzippedTarball)
 
@@ -40,44 +48,48 @@ module ApiSpecHelpers
   class SignedHeader
     include FactoryGirl::Syntax::Methods
 
+    # @attr_reader [Hash] the contents of the signed header to be used with the request
     attr_reader :contents
 
-    def initialize(tarball, options = {})
-      @tarball = tarball
-      @private_key_name = options.fetch(:private_key, 'valid_private_key.pem')
-      @omitted_headers = options.fetch(:omitted_headers, [])
-      @request_path = options.fetch(:request_path, '/api/v1/cookbooks')
-      @request_method = options.fetch(:request_method, 'post')
+    #
+    # Create a SignedHeader used for authenticated API requests
+    #
+    # @param [tarball] the file to sign the headers with, used for the content hash portion
+    #
+    # @param [Hash] opts the options to generate the signed header with
+    #
+    # @option opts [String] :private_key the name of the private key to generate the headers with
+    # @option opts [Array] :omitted_headers any signed headers you wish to omitt
+    # @option opts [String] :request_path the path of the request to be made
+    # @option opts [String] :request_method the HTTP method of the request to be made
+    # @option opts [User] :user the user that will be making the request
+    #
+    def initialize(tarball, opts = {})
+      private_key = OpenSSL::PKey::RSA.new(
+        File.read("spec/support/key_fixtures/#{opts.fetch(:private_key, 'valid_private_key.pem')}")
+      )
 
-      if options.has_key?(:user)
-        @user = options[:user]
+      if opts.has_key?(:user)
+        user = opts[:user]
       else
-        @user = create(:user)
-        @user.accounts << create(:account, provider: 'chef_oauth2')
+        user = create(:user)
+        user.accounts << create(:account, provider: 'chef_oauth2')
       end
 
       @contents = Mixlib::Authentication::SignedHeaderAuth.signing_object({
-        http_method: @request_method,
-        path: @request_path,
-        user_id: @user.username,
+        http_method: opts.fetch(:request_method, 'post'),
+        path: opts.fetch(:request_path, '/api/v1/cookbooks'),
+        user_id: user.username,
         timestamp: Time.now.utc.iso8601,
-        body: @tarball.read
+        body: tarball.read
       }).sign(private_key)
 
-      @omitted_headers.each { |h| @contents.delete(h) }
-    end
-
-    private
-
-    def private_key
-      OpenSSL::PKey::RSA.new(
-        File.read("spec/support/key_fixtures/#{@private_key_name}")
-      )
+      opts.fetch(:omitted_headers, []).each { |h| @contents.delete(h) }
     end
   end
 
   def share_cookbook(cookbook_name, options = {})
-    cookbook_upload = CookbookUpload.new(cookbook_name, options)
+    cookbook_upload = LocalCookbook.new(cookbook_name, options)
     tarball_upload = fixture_file_upload(cookbook_upload.tarball.path, 'application/x-gzip')
     signed_header = SignedHeader.new(tarball_upload, options)
 
@@ -89,7 +101,7 @@ module ApiSpecHelpers
 
   def unshare_cookbook(cookbook_name, options = {})
     cookbook_path = "/api/v1/cookbooks/#{cookbook_name}"
-    cookbook_upload = CookbookUpload.new(cookbook_name, options)
+    cookbook_upload = LocalCookbook.new(cookbook_name, options)
     tarball_upload = fixture_file_upload(cookbook_upload.tarball.path, 'application/x-gzip')
 
     signed_header = SignedHeader.new(
