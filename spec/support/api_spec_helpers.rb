@@ -78,19 +78,22 @@ module ApiSpecHelpers
 
   def share_cookbook(cookbook_name, options = {})
     cookbook_upload = CookbookUpload.new(cookbook_name, options)
-    signed_header = SignedHeader.new(cookbook_upload.tarball, options)
+    tarball_upload = fixture_file_upload(cookbook_upload.tarball.path, 'application/x-gzip')
+    signed_header = SignedHeader.new(tarball_upload, options)
 
     category = create(:category, name: options.fetch(:category, 'other').titleize)
-    tarball_upload = fixture_file_upload(cookbook_upload.tarball.path, 'application/x-gzip')
     payload = options.fetch(:payload, { cookbook: "{\"category\": \"#{category.name}\"}", tarball: tarball_upload })
 
     post '/api/v1/cookbooks', payload, signed_header.contents
   end
 
-  def unshare_cookbook(cookbook_name)
+  def unshare_cookbook(cookbook_name, options = {})
     cookbook_path = "/api/v1/cookbooks/#{cookbook_name}"
+    cookbook_upload = CookbookUpload.new(cookbook_name, options)
+    tarball_upload = fixture_file_upload(cookbook_upload.tarball.path, 'application/x-gzip')
 
     signed_header = SignedHeader.new(
+      tarball_upload,
       request_path: cookbook_path,
       request_method: 'delete',
       cookbook_name: cookbook_name
