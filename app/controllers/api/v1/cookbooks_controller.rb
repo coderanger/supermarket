@@ -29,7 +29,9 @@ class Api::V1::CookbooksController < Api::V1Controller
   #
   def show
     @cookbook = Cookbook.with_name(params[:cookbook]).first!
-    assign_latest_version_url
+    @latest_cookbook_version_url = api_v1_cookbook_version_url(
+      @cookbook, @cookbook.latest_cookbook_version
+    )
 
     @cookbook_versions_urls = @cookbook.cookbook_versions.map do |version|
       api_v1_cookbook_version_url(@cookbook, version)
@@ -63,14 +65,5 @@ class Api::V1::CookbooksController < Api::V1Controller
   def init_params
     @start = params.fetch(:start, 0).to_i
     @items = [params.fetch(:items, 10).to_i, 100].min
-  end
-
-  #
-  # Assigns a URL for the latest version of a cookbook.
-  #
-  def assign_latest_version_url
-    @latest_cookbook_version_url = api_v1_cookbook_version_url(
-      @cookbook, @cookbook.latest_cookbook_version
-    )
   end
 end

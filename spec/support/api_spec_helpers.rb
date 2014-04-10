@@ -95,11 +95,10 @@ module ApiSpecHelpers
     signed_header = SignedHeader.new(
       tarball_upload,
       request_path: cookbook_path,
-      request_method: 'delete',
-      cookbook_name: cookbook_name
+      request_method: 'delete'
     )
 
-    delete cookbook_path, {}, signed_header.contents
+    delete cookbook_path, { tarball: tarball_upload }, signed_header.contents
   end
 
   def json_body

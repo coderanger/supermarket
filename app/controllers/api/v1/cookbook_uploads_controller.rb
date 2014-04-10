@@ -66,7 +66,9 @@ class Api::V1::CookbookUploadsController < Api::V1Controller
   #
   def destroy
     @cookbook = Cookbook.with_name(params[:cookbook]).first!
-    assign_latest_version_url
+    @latest_cookbook_version_url = api_v1_cookbook_version_url(
+      @cookbook, @cookbook.latest_cookbook_version
+    )
 
     @cookbook.destroy
 
