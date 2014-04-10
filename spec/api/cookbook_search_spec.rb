@@ -20,8 +20,8 @@ describe 'GET /api/v1/search' do
   end
 
   before do
-    share_cookbook(cookbook_name: 'redis-test')
-    share_cookbook(cookbook_name: 'redisio-test')
+    share_cookbook('redis-test')
+    share_cookbook('redisio-test')
   end
 
   it 'returns a 200' do

@@ -4,13 +4,47 @@ require 'tempfile'
 require 'mixlib/authentication/signedheaderauth'
 
 module ApiSpecHelpers
-  class SignedRequestHelper
+  class CookbookUpload
+    attr_reader :tarball
+
+    def initialize(name, options = {})
+      @name = name
+      @metadata = {
+        name: name,
+        version: '1.0.0',
+        description: "Installs/Configures #{name}",
+        maintainer: 'Chef Software, Inc',
+        license: 'MIT',
+        platforms: {
+          'ubuntu' => '>= 12.0.0'
+        },
+        dependencies: {
+          'apt' => '~> 1.0.0'
+        }
+      }.merge(options.fetch(:custom_metadata, {}))
+
+      @tarball = Tempfile.new([@name, '.tgz'], 'tmp').tap do |file|
+        io = AndFeathers.build(@name) do |base_dir|
+          base_dir.file('README.md') { '# README' }
+          base_dir.file('metadata.json') do
+            JSON.dump(@metadata)
+          end
+        end.to_io(AndFeathers::GzippedTarball)
+
+        file.write(io.read)
+        file.rewind
+      end
+    end
+  end
+
+  class SignedHeader
     include FactoryGirl::Syntax::Methods
 
-    def initialize(options = {})
-      @cookbook_name = options.fetch(:cookbook_name, 'supermarket')
+    attr_reader :contents
+
+    def initialize(tarball, options = {})
+      @tarball = tarball
       @private_key_name = options.fetch(:private_key, 'valid_private_key.pem')
-      @custom_metadata = options.fetch(:custom_metadata, {})
       @omitted_headers = options.fetch(:omitted_headers, [])
       @request_path = options.fetch(:request_path, '/api/v1/cookbooks')
       @request_method = options.fetch(:request_method, 'post')
@@ -21,48 +55,16 @@ module ApiSpecHelpers
         @user = create(:user)
         @user.accounts << create(:account, provider: 'chef_oauth2')
       end
-    end
 
-    def tarball
-      metadata = {
-        name: @cookbook_name,
-        version: '1.0.0',
-        description: "Installs/Configures #{@cookbook_name}",
-        maintainer: 'Chef Software, Inc',
-        license: 'MIT',
-        platforms: {
-          'ubuntu' => '>= 12.0.0'
-        },
-        dependencies: {
-          'apt' => '~> 1.0.0'
-        }
-      }.merge(@custom_metadata)
-
-      tarball = Tempfile.new([@cookbook_name, '.tgz'], 'tmp').tap do |file|
-        io = AndFeathers.build(@cookbook_name) do |base_dir|
-          base_dir.file('README.md') { '# README' }
-          base_dir.file('metadata.json') do
-            JSON.dump(metadata)
-          end
-        end.to_io(AndFeathers::GzippedTarball)
-
-        file.write(io.read)
-        file.rewind
-      end
-    end
-
-    def signed_headers
-      signed_headers = Mixlib::Authentication::SignedHeaderAuth.signing_object({
+      @contents = Mixlib::Authentication::SignedHeaderAuth.signing_object({
         http_method: @request_method,
         path: @request_path,
         user_id: @user.username,
         timestamp: Time.now.utc.iso8601,
-        body: tarball.read
+        body: @tarball.read
       }).sign(private_key)
 
-      @omitted_headers.each { |h| signed_headers.delete(h) }
-
-      signed_headers
+      @omitted_headers.each { |h| @contents.delete(h) }
     end
 
     private
@@ -74,21 +76,27 @@ module ApiSpecHelpers
     end
   end
 
-  def share_cookbook(options = {})
-    sr = SignedRequestHelper.new(options)
-    category = create(:category, name: options.fetch(:category, 'other').titleize)
+  def share_cookbook(cookbook_name, options = {})
+    cookbook_upload = CookbookUpload.new(cookbook_name, options)
+    signed_header = SignedHeader.new(cookbook_upload.tarball, options)
 
-    tarball_upload = fixture_file_upload(sr.tarball.path, 'application/x-gzip')
+    category = create(:category, name: options.fetch(:category, 'other').titleize)
+    tarball_upload = fixture_file_upload(cookbook_upload.tarball.path, 'application/x-gzip')
     payload = options.fetch(:payload, { cookbook: "{\"category\": \"#{category.name}\"}", tarball: tarball_upload })
 
-    post '/api/v1/cookbooks', payload, sr.signed_headers
+    post '/api/v1/cookbooks', payload, signed_header.contents
   end
 
   def unshare_cookbook(cookbook_name)
     cookbook_path = "/api/v1/cookbooks/#{cookbook_name}"
 
-    sr = SignedRequestHelper.new(request_path: cookbook_path, request_method: 'delete', cookbook_name: cookbook_name)
-    delete cookbook_path, {}, sr.signed_headers
+    signed_header = SignedHeader.new(
+      request_path: cookbook_path,
+      request_method: 'delete',
+      cookbook_name: cookbook_name
+    )
+
+    delete cookbook_path, {}, signed_header.contents
   end
 
   def json_body

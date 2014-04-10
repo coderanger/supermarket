@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe 'DELETE /api/v1/cookbooks/:cookbook' do
-  context 'the cookbook exists', focus: true do
+  context 'the cookbook exists' do
     let(:cookbook_metadata_signature) do
       {
         'name' => 'redis-test',
@@ -15,7 +15,7 @@ describe 'DELETE /api/v1/cookbooks/:cookbook' do
     end
 
     before do
-      share_cookbook(cookbook_name: 'redis-test')
+      share_cookbook('redis-test')
       unshare_cookbook('redis-test')
     end
 
