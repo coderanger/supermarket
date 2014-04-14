@@ -446,17 +446,13 @@ input[type="search"].cookbook_search_textfield {
 // Cookbook
 .cookbook {
   background-color: white;
-  @include border-radius(rem-calc(2));
-  @include box-shadow(0 1px 1px rgba(0,0,0,0.25));
+  @include border-radius(rem-calc(4));
+  border: 1px solid lighten($silver, 10%);
   min-height: rem-calc(260);
   padding: rem-calc(4 4 4 4);
   position: relative;
   @include single-transition(background-color, $speed: 100ms);
   z-index: 1;
-
-  &:hover {
-    background-color: scale-lightness(white, -5%);
-  }
 }
 
 @media #{$mobile-only} {
@@ -471,13 +467,12 @@ input[type="search"].cookbook_search_textfield {
   }
 }
 
-.cookbook_heading {
-  background-color: white;
+.cookbook_partial_content {
+  @include grid-column($columns: 9);
   color: $primary_blue;
   @include border-top-right-radius(rem-calc(3));
-  font-size: rem-calc(24);
   margin: 0;
-  padding: rem-calc(30 10 25 20);
+  padding: rem-calc(10 10);
   word-wrap: break-word;
 
   .gravatar {
@@ -512,12 +507,27 @@ input[type="search"].cookbook_search_textfield {
 
   small {
     color: desaturate(lighten($primary_blue, 40%), 20%);
-    display: block;
     font: {
       size: rem-calc(14);
       weight: $bold;
     }
     margin: rem-calc(19 0 15);
+  }
+
+  pre {
+    color: $primary_blue;
+    padding: rem-calc(10);
+    font-size: rem-calc(12);
+    border: rem-calc(1) solid lighten($silver, 10%);
+    cursor: text;
+    @include border-radius(rem-calc(4));
+  }
+
+  .cookbook_title {
+    display: inline-block;
+    font-size: rem-calc(32);
+    margin-right: rem-calc(8);
+    color: $primary_blue;
   }
 
   @media #{$mobile-only} {
@@ -535,6 +545,10 @@ input[type="search"].cookbook_search_textfield {
   }
 }
 
+.cookbook_partial_sidebar {
+  @include grid-column($columns: 3);
+}
+
 @media #{$mobile-only} {
   .cookbook_heading {
     padding: rem-calc(15 10 10 20);
@@ -547,7 +561,7 @@ input[type="search"].cookbook_search_textfield {
   }
 }
 
-.cookbook_lastupdated {
+.cookbook_dates {
   color: $silver;
   font: $bold rem-calc(10) $default_font;
 
@@ -559,14 +573,14 @@ input[type="search"].cookbook_search_textfield {
 }
 
 @media #{$mobile-only} {
-  .cookbook_lastupdated {
+  .cookbook_dates {
     display: block;
     margin-top: rem-calc(5);
   }
 }
 
 @media #{$small-only} {
-  .cookbook_lastupdated {
+  .cookbook_dates {
     display: block;
     margin-top: rem-calc(5);
   }

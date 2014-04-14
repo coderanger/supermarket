@@ -1,11 +1,11 @@
 <li>
   <div class="cookbook">
-    <div class="cookbook_body">
+    <div class="cookbook_partial_content">
       <%= link_to cookbook, rel: 'cookbook' do %>
-        <h2><%= cookbook.name %></h2>
+        <h2 class="cookbook_title"><%= cookbook.name %></h2>
       <% end %>
       <small><%= cookbook.latest_cookbook_version.version %></small>
-      <span class="cookbook_lastupdated">
+      <span class="cookbook_dates right">
         <i class="fa fa-clock-o"></i> Updated <%= cookbook.updated_at.to_s(:long) %><br />
         Created <%= cookbook.created_at.to_s(:long) %>
       </span>
@@ -14,18 +14,29 @@
         <%= cookbook.description %>
       </p>
       <code><pre>cookbook '<%= cookbook.name %>', '~> <%= cookbook.latest_cookbook_version.version %>'</pre></code>
+
+      <div class="cookbook_footer">
+        <ul class="cookbook_platforms show-for-medium-up">
+          <% cookbook.supported_platforms.each do |platform| %>
+            <li class="cookbook_platform_icon has-tip" title="<%= platform.name %> <%= platform.version_constraint %>" data-tooltip data-icon="<%= supported_platform_icon(platform) %>">
+              <span><%= platform.name %></span>
+            </li>
+          <% end %>
+          <small>Supported Platforms</small>
+        </ul>
+      </div>
     </div>
 
-    <div class="cookbook_footer">
-      <ul class="cookbook_platforms show-for-medium-up">
-        <% cookbook.supported_platforms.each do |platform| %>
-          <li class="cookbook_platform_icon has-tip" title="<%= platform.name %> <%= platform.version_constraint %>" data-tooltip data-icon="<%= supported_platform_icon(platform) %>">
-            <span><%= platform.name %></span>
-          </li>
+    <div class="cookbook_partial_sidebar">
+      <div class="cookbook-urls">
+        <% if cookbook.source_url.present? %>
+          <%= link_to 'View Source', cookbook.source_url %>
         <% end %>
-        <small>Supported Platforms</small>
-      </ul>
 
+        <% if cookbook.issues_url.present? %>
+          <%= link_to 'View Issues', cookbook.issues_url %>
+        <% end %>
+      </div>
       <div class="cookbook_category_and_stats">
         <ul class="cookbook_stats">
           <li>
