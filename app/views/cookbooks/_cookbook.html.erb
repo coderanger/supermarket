@@ -1,15 +1,32 @@
 <li>
-  <%= link_to cookbook, rel: 'cookbook' do %>
-    <div class="cookbook category_<%= cookbook.category.name.parameterize('_') %>">
-      <h3 class="cookbook_heading">
-        <%= cookbook.name %>
-        <small><%= cookbook.latest_cookbook_version.version %></small>
-        <span class="cookbook_lastupdated">
-          <i class="fa fa-clock-o"></i> Updated <%= cookbook.updated_at.to_s(:long) %>
-        </span>
-      </h3>
+  <div class="cookbook">
+    <div class="cookbook_body">
+      <%= link_to cookbook, rel: 'cookbook' do %>
+        <h2><%= cookbook.name %></h2>
+      <% end %>
+      <small><%= cookbook.latest_cookbook_version.version %></small>
+      <span class="cookbook_lastupdated">
+        <i class="fa fa-clock-o"></i> Updated <%= cookbook.updated_at.to_s(:long) %><br />
+        Created <%= cookbook.created_at.to_s(:long) %>
+      </span>
+
+      <p>
+        <%= cookbook.description %>
+      </p>
+      <code><pre>cookbook '<%= cookbook.name %>', '~> <%= cookbook.latest_cookbook_version.version %>'</pre></code>
+    </div>
+
+    <div class="cookbook_footer">
+      <ul class="cookbook_platforms show-for-medium-up">
+        <% cookbook.supported_platforms.each do |platform| %>
+          <li class="cookbook_platform_icon has-tip" title="<%= platform.name %> <%= platform.version_constraint %>" data-tooltip data-icon="<%= supported_platform_icon(platform) %>">
+            <span><%= platform.name %></span>
+          </li>
+        <% end %>
+        <small>Supported Platforms</small>
+      </ul>
+
       <div class="cookbook_category_and_stats">
-        <i class="fa fa-folder"></i> <%= cookbook.category.name %>
         <ul class="cookbook_stats">
           <li>
             <i class="fa fa-download"></i> <%= cookbook.download_count %>
@@ -19,13 +36,6 @@
           </li>
         </ul>
       </div>
-      <ul class="cookbook_platforms show-for-medium-up">
-        <% cookbook.supported_platforms.each do |platform| %>
-          <li class="cookbook_platform_icon has-tip" title="<%= platform.name %> <%= platform.version_constraint %>" data-tooltip data-icon="<%= supported_platform_icon(platform) %>">
-            <span><%= platform.name %></span>
-          </li>
-        <% end %>
-      </ul>
     </div>
-  <% end %>
+  </div>
 </li>

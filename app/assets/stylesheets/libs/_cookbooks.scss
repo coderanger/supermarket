@@ -359,10 +359,6 @@ input[type="search"].cookbook_search_textfield {
   @include grid-column($columns: 12, $collapse: true);
 }
 
-.cookbook_content_category_listing {
-  margin-top: rem-calc(48);
-}
-
 @media #{$mobile-only} {
   .cookbook_content {
     @include grid-row();
@@ -429,7 +425,7 @@ input[type="search"].cookbook_search_textfield {
 }
 
 .cookbook_listing {
-  @include block-grid($per-row: 3, $spacing: rem-calc(40));
+  @include block-grid($per-row: 1, $spacing: rem-calc(40));
   margin: rem-calc(0 -20);
 }
 
@@ -449,18 +445,17 @@ input[type="search"].cookbook_search_textfield {
 
 // Cookbook
 .cookbook {
-  background-color: $clouds;
-  border-left: rem-calc(20) solid $silver;
-  @include border-right-radius(rem-calc(5));
+  background-color: white;
+  @include border-radius(rem-calc(2));
   @include box-shadow(0 1px 1px rgba(0,0,0,0.25));
-  min-height: rem-calc(322);
-  padding: rem-calc(4 4 10 0);
+  min-height: rem-calc(260);
+  padding: rem-calc(4 4 4 4);
   position: relative;
   @include single-transition(background-color, $speed: 100ms);
   z-index: 1;
 
   &:hover {
-    background-color: scale-lightness($clouds, -5%);
+    background-color: scale-lightness(white, -5%);
   }
 }
 
@@ -480,7 +475,7 @@ input[type="search"].cookbook_search_textfield {
   background-color: white;
   color: $primary_blue;
   @include border-top-right-radius(rem-calc(3));
-  font-size: rem-calc(18);
+  font-size: rem-calc(24);
   margin: 0;
   padding: rem-calc(30 10 25 20);
   word-wrap: break-word;
