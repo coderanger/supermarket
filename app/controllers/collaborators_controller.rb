@@ -2,6 +2,7 @@ class CollaboratorsController < ApplicationController
   before_filter :authenticate_user!, only: [:new, :create, :destroy]
   before_filter :find_cookbook, only: [:new, :create, :destroy]
   skip_before_filter :verify_authenticity_token, only: [:destroy]
+  helper_method :can_modify_collaborators?
 
   #
   # GET /collaborators?q=jimmy
@@ -39,7 +40,7 @@ class CollaboratorsController < ApplicationController
 
     if users.present?
       users.each do |user|
-        if can_modify_collaborators?(user)
+        if can_modify_collaborators?(@cookbook, user)
           cc = CookbookCollaborator.create cookbook: @cookbook, user: user
           CollaboratorMailer.delay.added_email(cc)
         end
@@ -60,7 +61,7 @@ class CollaboratorsController < ApplicationController
       format.js do
         user = User.find(params[:id])
 
-        if can_modify_collaborators?(user)
+        if can_modify_collaborators?(@cookbook, user)
           cc = CookbookCollaborator.with_cookbook_and_user(@cookbook, user)
 
           if cc.nil?
@@ -93,8 +94,8 @@ class CollaboratorsController < ApplicationController
   #
   # @return [Boolean] Whether the modification is legal
   #
-  def can_modify_collaborators?(user)
-    @cookbook.owner == current_user ||
-      (@cookbook.collaborators.include?(user) && user == current_user)
+  def can_modify_collaborators?(cookbook, user)
+    cookbook.owner == current_user ||
+      (cookbook.collaborators.include?(user) && user == current_user)
   end
 end
