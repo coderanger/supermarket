@@ -32,29 +32,25 @@
   &:hover { color: adjust-lightness($concrete, 20%); }
 }
 
+// Global chef elements
+.logo_and_nav_toggle {
+  @include grid-column(2, $collapse: true);
+}
+
 @media #{$mobile-only} {
-  .left-off-canvas-toggle:before { font-size: rem-calc(24); margin-top: rem-calc(23); }
+  .logo_and_nav_toggle {
+    @include grid-column(6, $collapse: true);
+  }
 }
 
 @media #{$small-only} {
-  .left-off-canvas-toggle:before { font-size: rem-calc(24); margin-top: rem-calc(23); }
-}
-
-@media #{$medium-only} {
-  .left-off-canvas-toggle:before { font-size: rem-calc(24); margin-top: rem-calc(23); }
-}
-
-@media #{$xlarge-up} {
-  .left-off-canvas-toggle:before { margin-top: rem-calc(24.5); }
+  .logo_and_nav_toggle {
+    @include grid-column(6, $collapse: true);
+  }
 }
 
 .off-canvas-list li a:hover {
   background-color: #222;
-}
-
-// Global chef elements
-.logo_and_nav_toggle {
-  @include grid-column(2, $collapse: true);
 }
 
 .logochef {
@@ -75,15 +71,6 @@
     width: rem-calc(140);
 
     span { display: none; }
-  }
-}
-
-@media #{$mobile-only} {
-  .logochef {
-    float: none;
-    left: 50%;
-    margin-left: rem-calc(-73.5);
-    position: absolute;
   }
 }
 
@@ -132,6 +119,18 @@
   }
 }
 
+@media #{$mobile-only} {
+  .appnav {
+    @include grid-column(6, $collapse: true);
+  }
+}
+
+@media #{$small-only} {
+  .appnav {
+    @include grid-column(6, $collapse: true);
+  }
+}
+
 .usermenu {
   color: darken($concrete, 5%);
   cursor: pointer;
@@ -154,12 +153,6 @@
     height: rem-calc(40);
     margin: rem-calc(30 10 0 0);
     width: rem-calc(40);
-  }
-}
-
-@media #{$mobile-only} {
-  .usermenu {
-    margin: rem-calc(0 20 0 0);
   }
 }
 
