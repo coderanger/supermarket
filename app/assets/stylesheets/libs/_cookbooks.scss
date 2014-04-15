@@ -7,11 +7,25 @@
 
 // Cookbooks search
 .cookbook_search {
+  background-color: $primary_blue;
   border: none;
   @include grid-row();
   width: initial;
-  padding: rem-calc(35);
-  background-color: $primary_blue;
+  padding: rem-calc(48 55 32);
+  position: relative;
+  z-index: 1;
+
+  .fa {
+    color: lighten($primary_gray, 5%);
+    font: {
+      family: "fontawesome" !important;
+      size: rem-calc(24);
+    }
+    left: rem-calc(75);
+    position: absolute;
+    top: rem-calc(67);
+    z-index: 2;
+  }
 }
 
 @media #{$mobile-only} {
@@ -24,30 +38,31 @@
 }
 
 input[type="search"].cookbook_search_textfield {
+  background-color: darken($primary_blue, 7%);
   border: none;
+  @include border-left-radius(rem-calc(3));
   @include box-shadow(none);
-  color: white;
-  background-color: darken($primary_blue, 10%);
-  font-size: rem-calc(44);
+  color: $clouds;
+  font: rem-calc(30) $accent_font;
   @include grid-column($columns: 11, $collapse: true);
-  height: auto;
-  margin: rem-calc(0 0 10 0);
-  padding: rem-calc(5 20);
+  height: rem-calc(64);
+  line-height: rem-calc(44);
+  padding: rem-calc(0 0 0 60);
 
   &::-webkit-input-placeholder {
-     color: darken(white, 5%);
+     color: $clouds;
   }
 
   &:-moz-placeholder { /* Firefox 18- */
-     color: darken(white, 5%);
+     color: $clouds;
   }
 
   &::-moz-placeholder {  /* Firefox 19+ */
-     color: darken(white, 5%);
+     color: $clouds;
   }
 
   &:-ms-input-placeholder {
-     color: darken(white, 5%);
+     color: $clouds;
   }
 }
 
@@ -68,17 +83,19 @@ input[type="search"].cookbook_search_textfield {
 }
 
 .cookbook_search_button {
-  background-color: lighten($primary_blue, 20%);
+  background-color: lighten($primary_blue, 10%);
+  @include border-right-radius(rem-calc(3));
   color: white;
-  font-size: rem-calc(28);
+  font-size: rem-calc(24);
   @include grid-column($columns: 1, $collapse: true);
+  height: rem-calc(64);
+  line-height: rem-calc(44);
+  padding: rem-calc(0 20);
   @include single-transition($speed: 100ms);
   text-align: center;
-  margin: rem-calc(0 0 10 0);
-  padding: rem-calc(14 20);
 
   &:hover, &:active, &:focus {
-    background-color: lighten($primary_blue, 10%);
+    background-color: lighten($primary_blue, 20%);
     color: white;
   }
 }

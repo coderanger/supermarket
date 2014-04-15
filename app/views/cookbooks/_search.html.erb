@@ -1,4 +1,5 @@
 <%= form_tag cookbooks_path, class: 'cookbook_search', method: :get do %>
+  <i class="fa fa-search"></i>
   <%= search_field_tag :q, params[:q], placeholder: 'Search Cookbooks', autofocus: 'true', class: 'cookbook_search_textfield' %>
   <%= button_tag(type: 'submit', class: 'cookbook_search_button') do %>
     GO
