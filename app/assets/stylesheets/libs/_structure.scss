@@ -19,14 +19,18 @@ body {
 }
 
 .container {
-  background-color: white;
   @include grid-row();
   min-height: 100%;
 }
 
 .page {
+  background-color: white;
   @include grid-column(12);
-  padding: rem-calc(70);
+  padding: rem-calc(55);
+
+  &.nobg {
+    background-color: transparent;
+  }
 }
 
 .footer {
