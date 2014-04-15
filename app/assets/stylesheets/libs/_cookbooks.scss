@@ -10,7 +10,6 @@
   background-color: $primary_blue;
   border: none;
   @include grid-row();
-  width: initial;
   padding: rem-calc(48 55 32);
   position: relative;
   z-index: 1;
@@ -30,10 +29,44 @@
 
 @media #{$mobile-only} {
   .cookbook_search {
-    border: none;
     margin-bottom: rem-calc(20);
-    position: relative;
-    z-index: 1;
+    padding: rem-calc(32 55);
+
+    .fa {
+      top: rem-calc(51);
+    }
+  }
+}
+
+.search_field {
+  @include grid-column($columns: 11, $collapse: true);
+}
+
+@media #{$small-only} {
+  .search_field {
+    @include grid-column($columns: 10, $collapse: true);
+  }
+}
+
+@media #{$mobile-only} {
+  .search_field {
+    @include grid-column($columns: 12, $collapse: true);
+  }
+}
+
+.search_button {
+  @include grid-column($columns: 1, $collapse: true);
+}
+
+@media #{$small-only} {
+  .search_button {
+    @include grid-column($columns: 2, $collapse: true);
+  }
+}
+
+@media #{$mobile-only} {
+  .search_button {
+    display: none;
   }
 }
 
@@ -44,7 +77,6 @@ input[type="search"].cookbook_search_textfield {
   @include box-shadow(none);
   color: $clouds;
   font: rem-calc(30) $accent_font;
-  @include grid-column($columns: 11, $collapse: true);
   height: rem-calc(64);
   line-height: rem-calc(44);
   padding: rem-calc(0 0 0 60);
@@ -68,17 +100,9 @@ input[type="search"].cookbook_search_textfield {
 
 @media #{$mobile-only} {
   input[type="search"].cookbook_search_textfield {
-    background-color: $clouds;
-    border: none;
-    @include border-radius(rem-calc(30));
-    font-size: rem-calc(30);
-    @include grid-column($columns: 12, $collapse: true);
+    @include border-radius(rem-calc(40));
+    font-size: rem-calc(24);
     margin: 0;
-    padding: rem-calc(5 20);
-
-    &:focus {
-      background-color: darken($clouds, 2%);
-    }
   }
 }
 
@@ -87,31 +111,16 @@ input[type="search"].cookbook_search_textfield {
   @include border-right-radius(rem-calc(3));
   color: white;
   font-size: rem-calc(24);
-  @include grid-column($columns: 1, $collapse: true);
   height: rem-calc(64);
   line-height: rem-calc(44);
   padding: rem-calc(0 20);
   @include single-transition($speed: 100ms);
   text-align: center;
+  width: 100%;
 
   &:hover, &:active, &:focus {
     background-color: lighten($primary_blue, 20%);
     color: white;
-  }
-}
-
-@media #{$mobile-only} {
-  .cookbook_search_button {
-    background-color: transparent;
-    font-size: rem-calc(24);
-    position: absolute;
-    right: rem-calc(15);
-    top: rem-calc(9);
-
-    &:hover, &:active, &:focus {
-      background-color: transparent;
-      color: darken($concrete, 10%);
-    }
   }
 }
 
