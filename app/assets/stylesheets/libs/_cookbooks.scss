@@ -398,21 +398,14 @@ input[type="search"].cookbook_search_textfield {
 }
 
 .cookbook_content_heading {
-  border-bottom: rem-calc(2) solid lighten($secondary_gray, 35%);
-  color: saturate(lighten($primary_gray, 20%), 13%);
+  color: $silver;
   font: {
-    size: rem-calc(24);
+    size: rem-calc(30);
     weight: $normal;
   }
-  margin: rem-calc(0 0 20 0);
-  padding-bottom: rem-calc(15);
+  margin: rem-calc(0 0 40 0);
 
   small { @include inline-block; }
-
-  .fa-folder {
-    color: lighten($secondary_gray, 30%);
-    margin-right: rem-calc(11);
-  }
 
   .label {
     color: lighten($primary_gray, 20%);
@@ -451,8 +444,17 @@ input[type="search"].cookbook_search_textfield {
 }
 
 .cookbook_listing {
-  @include block-grid($per-row: 1, $spacing: rem-calc(40));
-  margin: rem-calc(0 -20);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li {
+    margin-bottom: rem-calc(20);
+
+    &:last-child {
+      margin-bottom: rem-calc(40);
+    }
+  }
 }
 
 @media #{$mobile-only} {
@@ -471,35 +473,15 @@ input[type="search"].cookbook_search_textfield {
 
 // Cookbook
 .cookbook {
-  background-color: white;
-  @include border-radius(rem-calc(4));
-  border: 1px solid lighten($silver, 10%);
-  min-height: rem-calc(260);
-  padding: rem-calc(4 4 4 4);
-  position: relative;
-  @include single-transition(background-color, $speed: 100ms);
-  z-index: 1;
-}
-
-@media #{$mobile-only} {
-  .cookbook {
-    min-height: 0;
-  }
-}
-
-@media #{$small-only} {
-  .cookbook {
-    min-height: 0;
-  }
+  background-color: $cookbook_partial_sidebar;
+  border: 1px solid $cookbook_border;
+  @include grid-row();
 }
 
 .cookbook_partial_content {
-  @include grid-column($columns: 9);
-  color: $primary_blue;
-  @include border-top-right-radius(rem-calc(3));
-  margin: 0;
-  padding: rem-calc(10 10);
-  word-wrap: break-word;
+  background-color: white;
+  @include grid-column($columns: 9, $collapse: true);
+  padding: rem-calc(30);
 
   .gravatar {
     background-color: $primary_gray;
@@ -571,8 +553,19 @@ input[type="search"].cookbook_search_textfield {
   }
 }
 
+.cookbook_footer {
+  background-color: $cookbook_footer;
+  border-top: 1px solid $cookbook_border;
+  margin: rem-calc(30 -30 -30 -30);
+  padding: rem-calc(30);
+
+  h5 {
+    margin: 0;
+  }
+}
+
 .cookbook_partial_sidebar {
-  @include grid-column($columns: 3);
+  @include grid-column($columns: 3, $collapse: true);
 }
 
 @media #{$mobile-only} {
@@ -885,9 +878,10 @@ pre.prettyprint {
 // Cookbook platform icons
 .cookbook_platforms {
   @include box-sizing(border-box);
+  @include clearfix;
   list-style: none;
   margin: 0;
-  padding: rem-calc(20 0 20 20);
+  padding: 0;
 
   .cookbook_show_sidebar & {
     @include clearfix;

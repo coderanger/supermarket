@@ -26,7 +26,7 @@ body {
 .page {
   background-color: white;
   @include grid-column(12);
-  padding: rem-calc(55);
+  padding: rem-calc(40 55 55);
 
   &.nobg {
     background-color: transparent;
