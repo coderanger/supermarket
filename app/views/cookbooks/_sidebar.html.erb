@@ -68,12 +68,13 @@
       <% collaborators.each do |collaborator| %>
         <div>
           <%= link_to gravatar_for(collaborator, size: 80), collaborator, title: collaborator.name %>
-          <% if can_modify_collaborators?(cookbook, collaborator) %>
+          <% if policy(collaborator.collaborator_for_cookbook(cookbook)).destroy? %>
             <%= link_to 'x', cookbook_collaborator_path(cookbook, collaborator), remote: true, method: :delete %>
           <% end %>
         </div>
       <% end %>
-      <% if owner?(cookbook) %>
+
+      <% if policy(@owner_collaborator).create? %>
         <div>
           <%= link_to 'Add', new_cookbook_collaborator_path(cookbook) %>
         </div>

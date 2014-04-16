@@ -55,7 +55,7 @@ describe CollaboratorsController do
         expect do
           post :create, cookbook_id: cookbook.to_param, cookbook_collaborator: { user_id: hank.to_param }
         end.to_not change { CookbookCollaborator.count }
-        expect(response).to redirect_to(cookbook_path(cookbook))
+        expect(response.status).to eql(404)
       end
     end
 

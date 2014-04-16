@@ -13,6 +13,14 @@ describe User do
     it { should validate_presence_of(:email) }
   end
 
+  it 'should find a cookbook collaborator given a cookbook' do
+    u = create(:user)
+    c = create(:cookbook)
+    create(:icla_signature, user: u)
+    cc = CookbookCollaborator.create! cookbook: c, user: u
+    expect(u.reload.collaborator_for_cookbook(c)).to eql(cc)
+  end
+
   describe '#signed_icla?' do
     it 'is true when there is an icla signature' do
       user = build(:user, icla_signatures: [build(:icla_signature)])

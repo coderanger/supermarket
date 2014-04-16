@@ -80,6 +80,7 @@ class CookbooksController < ApplicationController
     @owner = @cookbook.owner
     @collaborators = @cookbook.collaborators
     @supported_platforms = @cookbook.supported_platforms
+    @owner_collaborator = CookbookCollaborator.new cookbook: @cookbook, user: @owner
 
     respond_to do |format|
       format.atom

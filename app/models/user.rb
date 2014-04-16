@@ -38,6 +38,17 @@ class User < ActiveRecord::Base
   )
 
   #
+  # Find a CookbookCollaborator for this User, given a Cookbook
+  #
+  # @param cookbook [Cookbook]
+  #
+  # @return [CookbookCollaborator]
+  #
+  def collaborator_for_cookbook(cookbook)
+    cookbook_collaborators.where(cookbook_id: cookbook.id).first
+  end
+
+  #
   # The commit author identities who have signed a CLA
   #
   # @return [Array<Curry::CommitAuthor>]

@@ -40,8 +40,9 @@ class CollaboratorsController < ApplicationController
 
     if users.present?
       users.each do |user|
-        if can_modify_collaborators?(@cookbook, user)
-          cc = CookbookCollaborator.create cookbook: @cookbook, user: user
+        cc = CookbookCollaborator.new cookbook: @cookbook, user: user
+        if authorize!(cc)
+          cc.save
           CollaboratorMailer.delay.added_email(cc)
         end
       end
@@ -61,17 +62,17 @@ class CollaboratorsController < ApplicationController
       format.js do
         user = User.find(params[:id])
 
-        if can_modify_collaborators?(@cookbook, user)
-          cc = CookbookCollaborator.with_cookbook_and_user(@cookbook, user)
+        cc = CookbookCollaborator.with_cookbook_and_user(@cookbook, user)
 
-          if cc.nil?
-            head :not_found
-          else
+        if cc.nil?
+          head :not_found
+        else
+          if authorize!(cc)
             cc.destroy
             head :ok
+          else
+            head :forbidden
           end
-        else
-          head :forbidden
         end
       end
     end
@@ -86,16 +87,5 @@ class CollaboratorsController < ApplicationController
   #
   def find_cookbook
     @cookbook = Cookbook.with_name(params[:cookbook_id]).first!
-  end
-
-  #
-  # Determine if the cookbook collaborators can be modified. Only the cookbook
-  # owner or the collaborator in question can remove collaborators.
-  #
-  # @return [Boolean] Whether the modification is legal
-  #
-  def can_modify_collaborators?(cookbook, user)
-    cookbook.owner == current_user ||
-      (cookbook.collaborators.include?(user) && user == current_user)
   end
 end
